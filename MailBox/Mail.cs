@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
 
+
 namespace MailBox
 {
     internal class Mail
@@ -92,20 +93,35 @@ namespace MailBox
             authorization = null;
         }
 
-/*        public void SendMessage(Message message)
+        public void SendMessage(Message message)
         {
             if (authorization == null) throw new Exception("Вы не авторизованы");
-            using (TextWriter fs = File().OpenWrite($"{mail}.json"))
-            {
-                JsonSerializer.Serialize(fs, message);
-                Console.WriteLine("Data has been saved to file");
-            }
-        }*/
 
-/*        public void CheckMessages()
+            string addressee = message.To_mail;
+            foreach (string s in File.ReadAllLines("mails.txt"))
+            {
+                if (s.Contains(addressee))
+                {
+                    File.WriteAllText($"{addressee.Substring(0, addressee.IndexOf('@'))}.json", JsonConvert.SerializeObject(message));
+                    Console.WriteLine("Сообщение успешно отправлено!");
+                    return;
+                }
+            }
+            Console.WriteLine("Получатель не найден!");
+            return;
+        }
+
+        public void CheckMessages()
         {
             if (authorization == null) throw new Exception("Вы не авторизованы");
-            Десилиряция из JSON файла сообщений.
-        }*/
+
+            var message = File.Exists($"{mail}.json") ? JsonConvert.DeserializeObject<Message>(File.ReadAllText($"{mail}.json")) : null;
+            if (message == null)
+            {
+                Console.WriteLine("Нет новых сообщений!");
+                return;
+            }
+            Console.WriteLine($"Тема: {message.Header} \nОт: {message.From_mail}\nКому: {message.To_mail}\nОтправлено {message.Date}\n Сообщение: {message.MessageText}");
+        }
     }
 }
