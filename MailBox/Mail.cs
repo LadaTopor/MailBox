@@ -63,34 +63,48 @@ namespace MailBox
             Password = password;
             SaveMail();
         }
-        
+
         private void SaveMail()
         {
-            Console.WriteLine("cocopay");
-            StreamWriter fs = new StreamWriter("mails.txt");
-            fs.WriteLine($"{Mail_address} | {Password}");
+            using (FileStream path = new FileStream("mails.txt", FileMode.OpenOrCreate))
+            {
+                using (StreamReader sr = new StreamReader(path)) {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        if (line.Contains(Mail_address)) return; 
+                    }
+                    using (StreamWriter fs = new StreamWriter(path))
+                    {
+                        fs.WriteLine($"{Mail_address} {Password}");
+                        return;
+                    }
+                }
+            }
         }
-
-        public void Authorization(string mail, string password)
+        
+    
+        public void Authorization(string password)
         {
             StreamReader fw = new StreamReader("mails.txt");
             string line;
             while ((line = fw.ReadLine()) != null)
             {
-                if (line.Split('|')[0] == mail && line.Split('|')[1] == password)
+                string[] s = line.Split(' ');                
+                if (s[0] == Mail_address && s[1] == password)
                 {
                     authorization = mail;
                     Console.WriteLine("Вы успешно авторизовались!");
                     return;
                 }
             }
-            Console.WriteLine("Неверный почтовый ящик или пароль.");
-            return;
+            throw new Exception("Неверный почтовый ящик или пароль.");
         }
 
         public void LogOut()
         {
             authorization = null;
+            Console.WriteLine("Вы вышли из почты!");
         }
 
         public void SendMessage(Message message)
@@ -121,7 +135,7 @@ namespace MailBox
                 Console.WriteLine("Нет новых сообщений!");
                 return;
             }
-            Console.WriteLine($"Тема: {message.Header} \nОт: {message.From_mail}\nКому: {message.To_mail}\nОтправлено {message.Date}\n Сообщение: {message.MessageText}");
+            Console.WriteLine($"Тема: {message.Header} \nОт: {message.From_mail}\nКому: {message.To_mail}\nОтправлено {message.Date}\nСообщение: {message.MessageText}");
         }
     }
 }
